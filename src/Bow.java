@@ -1,17 +1,81 @@
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
-public class Main {
-    public static void main(String[] args) {
-        // Press Opt+Enter with your caret at the highlighted text to see how
-        // IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
-        // Press Ctrl+R or click the green arrow button in the gutter to run the code.
-        for (int i = 1; i <= 5; i++) {
+public class Bow {
+    private int x, y;
+    private int length;
+    private double angle;
+    private Arrow arrow;
+    private BufferedImage image;
 
-            // Press Ctrl+D to start debugging your code. We have set one breakpoint
-            // for you, but you can always add more by pressing Cmd+F8.
-            System.out.println("i = " + i);
+    public Bow(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.length = 120; // Default length of the bow
+        this.angle = 45; // Default starting angle pointing up at 45 degrees
+        this.arrow = new Arrow(x,y);
+        try {
+            this.image = ImageIO.read(new File("resources/bow.png")); // Load the bow image
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.image = null; // Handle the case where the image is not found
         }
     }
+
+    public void draw(Graphics g) {
+        if (image != null) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            AffineTransform at = new AffineTransform();
+
+            // Calculate the center of the image for rotation
+            int centerX = image.getWidth() / 2;
+            int centerY = image.getHeight() / 2;
+
+            // Translate to the drawing location and rotate about the center of the image
+            at.translate(x - centerX, y - centerY);
+            at.rotate(Math.toRadians(-angle), centerX, centerY);
+
+            g2d.drawImage(image, at, null);
+            g2d.dispose();
+        } else {
+
+            g.fillRect(x - 50, y - 5, 100, 10);
+        }
+    }
+
+    public Point getTipLocation() {
+        int length = image.getWidth();
+        double tipX = x + (double) length  * Math.cos(Math.toRadians(angle));
+        double tipY = y + (double) length  * Math.sin(Math.toRadians(angle));
+        return new Point((int) tipX, (int) tipY);
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
+    public Arrow getArrow() {
+        return arrow;
+    }
+
+    public void shootArrow() {
+        arrow.shoot();
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
 }
