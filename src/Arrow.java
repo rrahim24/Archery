@@ -37,6 +37,7 @@ public class Arrow {
             this.image = null;
         }
         increaseSpeed();
+        decreaseSpeed();
     }
 
     public List<Point> simulateTrajectory() {
@@ -46,8 +47,6 @@ public class Arrow {
         double simVx = vx;
         double simVy = vy;
         double simDeltaTime = 0.1;
-
-
 
         for (int i = 0; i < 50; i++) {
             simX += simVx * simDeltaTime;
@@ -67,6 +66,7 @@ public class Arrow {
         vx = 0;
         vy = 0;
         increaseSpeed();
+        decreaseSpeed();
     }
 
     public void setVelocity(double angle, double speed) {
@@ -165,6 +165,10 @@ public class Arrow {
 
     public double getY() {
         return y;
+    }
+
+    public void setHasHitTarget(boolean hasHitTarget) {
+        this.hasHitTarget = hasHitTarget;
     }
 
     public void stop() {

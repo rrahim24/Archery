@@ -12,14 +12,16 @@ public class Bow {
     private Arrow arrow;
     private BufferedImage image;
 
+
+
     public Bow(int x, int y) {
         this.x = x;
         this.y = y;
-        this.length = 120; // Default length of the bow
-        this.angle = 45; // Default starting angle pointing up at 45 degrees
+        this.length = 120;
+        this.angle = 45;
         this.arrow = new Arrow(x,y);
         try {
-            this.image = ImageIO.read(new File("resources/bow.png")); // Load the bow image
+            this.image = ImageIO.read(new File("resources/bow.png"));
         } catch (IOException e) {
             e.printStackTrace();
             this.image = null; // Handle the case where the image is not found
@@ -31,11 +33,9 @@ public class Bow {
             Graphics2D g2d = (Graphics2D) g.create();
             AffineTransform at = new AffineTransform();
 
-            // Calculate the center of the image for rotation
             int centerX = image.getWidth() / 2;
             int centerY = image.getHeight() / 2;
 
-            // Translate to the drawing location and rotate about the center of the image
             at.translate(x - centerX, y - centerY);
             at.rotate(Math.toRadians(-angle), centerX, centerY);
 

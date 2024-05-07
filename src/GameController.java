@@ -9,14 +9,43 @@ public class GameController implements KeyListener, ActionListener {
     private Target target;
     private GameWindow gameWindow;
     private Timer timer;
+    private Timer moveTimer;
+    private Timer repaintTimer;
+    private static final int INTERVAL = 10000;
+    private long nextMoveTime;
+    private int score;
 
     public GameController() {
-        bow = new Bow(100, 300);
-        target = new Target(700, 300);
+        bow = new Bow(100, 500);
+        target = new Target(600, 150, this);
         gameWindow = new GameWindow(this);
         gameWindow.addKeyListener(this);
         timer = new Timer(20, this);
+        repaintTimer = new Timer(1000, e -> gameWindow.repaint());
+        repaintTimer.start();
+        setupMoveTimer();
+
         timer.start();
+    }
+
+    private void setupMoveTimer() {
+        // Current time plus the interval
+        nextMoveTime = System.currentTimeMillis() + INTERVAL;
+
+        // Timer to update and check every second
+        moveTimer = new Timer(1000, e -> {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime >= nextMoveTime) {
+                target.moveToRandomPosition(gameWindow.getWidth(), gameWindow.getHeight());
+                // Reset next move time
+                nextMoveTime = currentTime + INTERVAL;
+            }
+            gameWindow.repaint();
+        });
+        moveTimer.start();
+    }
+    public long getNextMoveTime() {
+        return nextMoveTime;
     }
 
     @Override
@@ -27,33 +56,57 @@ public class GameController implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (getArrow().hasHitTarget()) {
-            return;
-        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_SPACE:
-                if (!getArrow().isFlying()) {
+
+                if (!getArrow().isFlying() && !getArrow().hasHitTarget()) {
                     double initialSpeed = getArrow().getSpeed();
                     getArrow().setVelocity(getArrow().getAngle(), initialSpeed);
                     getArrow().shoot();
                 }
                 break;
             case KeyEvent.VK_DOWN:
-                getArrow().changeAngleBy(-5.0);
-                bow.setAngle(bow.getAngle() - 5);
+                if (!getArrow().hasHitTarget()) {
+                    getArrow().changeAngleBy(-5.0);
+                    bow.setAngle(bow.getAngle() - 5);
+                }
                 break;
             case KeyEvent.VK_UP:
-                getArrow().changeAngleBy(5.0);
-                bow.setAngle(bow.getAngle() + 5);
+                if (!getArrow().hasHitTarget()) {
+                    getArrow().changeAngleBy(5.0);
+                    bow.setAngle(bow.getAngle() + 5);
+                }
                 break;
             case KeyEvent.VK_LEFT:
-                getArrow().decreaseSpeed();
+                if (!getArrow().hasHitTarget()) {
+                    getArrow().decreaseSpeed();
+                }
                 break;
             case KeyEvent.VK_RIGHT:
-                getArrow().increaseSpeed();
+                if (!getArrow().hasHitTarget()) {
+                    getArrow().increaseSpeed();
+                }
+                break;
+            case KeyEvent.VK_R:
+
+                resetArrowToBow();
                 break;
         }
         gameWindow.repaint();
+    }
+    public void increaseScore(int points) {
+        this.score += points;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void resetArrowToBow() {
+        Arrow arrow = getArrow();
+        arrow.reset(bow.getX(), bow.getY(), bow.getAngle());
+        arrow.setFlying(false);
+        arrow.setHasHitTarget(false);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -64,6 +117,7 @@ public class GameController implements KeyListener, ActionListener {
             Point tip = arrow.getTipPosition();
             if (target.getBounds().contains(tip)) {
                 arrow.stop();
+                increaseScore(10);
                 arrow.setFlying(false);
             } else if (isArrowOutOfBounds(arrow)) {
                 arrow.reset(bow.getX(), bow.getY(), bow.getAngle());
@@ -71,6 +125,7 @@ public class GameController implements KeyListener, ActionListener {
 
             gameWindow.repaint();
         }
+
     }
 
     private boolean isArrowOutOfBounds(Arrow arrow) {
@@ -103,8 +158,10 @@ public class GameController implements KeyListener, ActionListener {
     public void playGame() {
     }
 
+
     public static void main(String[] args) {
         GameController game = new GameController();
         game.playGame();
     }
+
 }
