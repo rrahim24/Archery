@@ -11,21 +11,53 @@ public class GameController implements KeyListener, ActionListener {
     private Timer timer;
     private Timer moveTimer;
     private Timer repaintTimer;
-    private static final int INTERVAL = 10000;
+    private static final int INTERVAL = 5000;
     private long nextMoveTime;
     private int score;
+    private int timeLeft = 60;
+    private Timer gameTimer;
+    private boolean gameOver = false;
 
     public GameController() {
         bow = new Bow(100, 500);
         target = new Target(600, 150, this);
         gameWindow = new GameWindow(this);
+        setupGameTimer();
         gameWindow.addKeyListener(this);
         timer = new Timer(20, this);
         repaintTimer = new Timer(1000, e -> gameWindow.repaint());
         repaintTimer.start();
         setupMoveTimer();
-
         timer.start();
+    }
+
+    private void setupGameTimer() {
+        gameTimer = new Timer(1000, e -> {
+            timeLeft--;
+            gameWindow.repaint();
+            if (timeLeft <= 0) {
+                gameOver = true;
+                gameTimer.stop();
+                gameWindow.repaint();
+            }
+        });
+        gameTimer.start();
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void resetGame() {
+        score = 0;
+        getArrow().setSpeed(120.0);
+        timeLeft = 60;
+        gameOver = false;
+        gameTimer.restart();  // Ensure the timer restarts
+        gameWindow.repaint();
+    }
+    public int getTimeLeft() {
+        return timeLeft;
     }
 
     private void setupMoveTimer() {

@@ -7,7 +7,6 @@ import java.io.IOException;
 
 public class Bow {
     private int x, y;
-    private int length;
     private double angle;
     private Arrow arrow;
     private BufferedImage image;
@@ -17,7 +16,6 @@ public class Bow {
     public Bow(int x, int y) {
         this.x = x;
         this.y = y;
-        this.length = 120;
         this.angle = 45;
         this.arrow = new Arrow(x,y);
         try {

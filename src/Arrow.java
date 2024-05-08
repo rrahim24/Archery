@@ -15,7 +15,7 @@ public class Arrow {
     private boolean isFlying;
     private final double gravity = 9.81;
     private double angle = 45.0;
-    private double speed = 75.0;
+    private double speed = 120.0;
     private BufferedImage image;
     private boolean hasHitTarget = false;
 
