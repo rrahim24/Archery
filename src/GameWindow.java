@@ -1,8 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.*;
 
 
@@ -62,42 +60,40 @@ public class GameWindow extends JFrame implements KeyListener {
 
     @Override
     public void paint(Graphics g) {
-        if (!game.isGameOver()) {
-            g.drawImage(background, 0, 0, this);
-            drawTimer(g, game.getTimeLeft());
+        if (!game.isGameOver()) {  // Check if the game is still running
+            g.drawImage(background, 0, 0, this);  // Draw the background image
+            drawTimer(g, game.getTimeLeft());  // Draw the game timer
+
             Arrow arrow = game.getArrow();
 
+            // Check if the arrow is not flying and has not hit the target to simulate its trajectory
             if (!arrow.isFlying() && !arrow.hasHitTarget()) {
                 List<Point> trajectory = arrow.simulateTrajectory();
-                for (Point p : trajectory) {
+                for (Point p : trajectory) {  // Draw each point of the trajectory
                     g.setColor(Color.BLACK);
-                    if (p.x < 300){
+                    if (p.x < 300){  // Limit trajectory drawing to part of the screen
                         g.fillOval(p.x, p.y, 3, 3);
                     }
                 }
             }
+
+            // Draw the bow, target, and arrow
             game.getBow().draw(g);
             game.getTarget().draw(g);
             game.getArrow().draw(g);
 
+            // Calculate and display the time left until the next move
             long currentTime = System.currentTimeMillis();
             long timeLeft = (game.getNextMoveTime() - currentTime) / 1000;
-
-            // Prevent displaying negative time; reset to 10 if it reaches 0
             if (timeLeft < 0) {
                 timeLeft = INTERVAL / 1000;
             }
-
             g.setColor(Color.BLACK);
             g.drawString("Score: " + game.getScore(), 10, 130);
-
-            // Draw the countdown timer
-            g.setColor(Color.BLACK);
             g.drawString("Next move in: " + timeLeft + " seconds", 650, 80);
             g.drawString("Speed: " + String.format("%.1f", game.getArrow().getSpeed()), 10, 100);
         } else {
-            drawGameOverScreen(g);
+            drawGameOverScreen(g);  // Draw game over screen if the game has ended
         }
-
     }
 }

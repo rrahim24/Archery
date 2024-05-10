@@ -11,7 +11,7 @@ public class GameController implements KeyListener, ActionListener {
     private Timer timer;
     private Timer moveTimer;
     private Timer repaintTimer;
-    private static final int INTERVAL = 5000;
+    private static final int INTERVAL = 7000;
     private long nextMoveTime;
     private int score;
     private int timeLeft = 60;
@@ -50,10 +50,10 @@ public class GameController implements KeyListener, ActionListener {
 
     public void resetGame() {
         score = 0;
-        getArrow().setSpeed(120.0);
+        getArrow().setSpeed(170.0);
         timeLeft = 60;
         gameOver = false;
-        gameTimer.restart();  // Ensure the timer restarts
+        gameTimer.restart();
         gameWindow.repaint();
     }
     public int getTimeLeft() {
@@ -61,7 +61,6 @@ public class GameController implements KeyListener, ActionListener {
     }
 
     private void setupMoveTimer() {
-        // Current time plus the interval
         nextMoveTime = System.currentTimeMillis() + INTERVAL;
 
         // Timer to update and check every second
@@ -119,10 +118,6 @@ public class GameController implements KeyListener, ActionListener {
                     getArrow().increaseSpeed();
                 }
                 break;
-            case KeyEvent.VK_R:
-
-                resetArrowToBow();
-                break;
         }
         gameWindow.repaint();
     }
@@ -143,21 +138,32 @@ public class GameController implements KeyListener, ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         Arrow arrow = getArrow();
-        if (arrow.isFlying()) {
+
+        if (arrow.hasHitTarget()) {  // Check if arrow has hit the target
+            resetArrowToBow();       // Reset arrow to bow if it has hit
+        }
+
+        if (arrow.isFlying()) {      // If the arrow is flying Update its position
             arrow.updatePosition(0.1);
 
             Point tip = arrow.getTipPosition();
-            if (target.getBounds().contains(tip)) {
+            if (target.getBounds().contains(tip)) {  // Check if arrow tip is within target bounds
                 arrow.stop();
-                increaseScore(10);
-                arrow.setFlying(false);
-            } else if (isArrowOutOfBounds(arrow)) {
+                // Score based on precision of hit
+                if (arrow.getY() > target.getBounds().getY() + (target.getBounds().getHeight() / 2 - 15) &&
+                        arrow.getY() < target.getBounds().getY() + (target.getBounds().getHeight() / 2 + 11)){
+                    increaseScore(20);  // Higher score for more central hits
+                }
+                else {
+                    increaseScore(10);  // Lower score otherwise
+                }
+                arrow.setFlying(false); // Mark arrow as no longer flying
+            } else if (isArrowOutOfBounds(arrow)) { // Reset if arrow is out of bounds
                 arrow.reset(bow.getX(), bow.getY(), bow.getAngle());
             }
 
-            gameWindow.repaint();
+            gameWindow.repaint();  // Refresh game window
         }
-
     }
 
     private boolean isArrowOutOfBounds(Arrow arrow) {

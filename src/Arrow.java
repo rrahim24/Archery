@@ -15,7 +15,7 @@ public class Arrow {
     private boolean isFlying;
     private final double gravity = 9.81;
     private double angle = 45.0;
-    private double speed = 120.0;
+    private double speed = 170.0;
     private BufferedImage image;
     private boolean hasHitTarget = false;
 
@@ -25,16 +25,16 @@ public class Arrow {
         this.isFlying = false;
         try {
             BufferedImage originalImage = ImageIO.read(new File("resources/arrow.png"));
-            double scale = 0.4;
-            int newWidth = (int) (originalImage.getWidth() * scale);
-            int newHeight = (int) (originalImage.getHeight() * scale);
-            this.image = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+            int newWidth = (int) (originalImage.getWidth() * 0.4);  // Calculate the new width
+            int newHeight = (int) (originalImage.getHeight() * 0.4);  // Calculate the new height
+            this.image = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);  // Create a new buffered image
+            // Setup the scaling transformation
             AffineTransform at = new AffineTransform();
-            at.scale(scale, scale);
-            AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-            this.image = scaleOp.filter(originalImage, this.image);
+            at.scale(0.4, 0.4);  // Apply scaling
+            AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);  // Create a scaling operation
+            this.image = scaleOp.filter(originalImage, this.image);  // Apply the scaling operation to the original image
         } catch (IOException e) {
-            this.image = null;
+            this.image = null; // If an error occurs, set the image to null
         }
         increaseSpeed();
         decreaseSpeed();
@@ -48,11 +48,16 @@ public class Arrow {
         double simVy = vy;
         double simDeltaTime = 0.1;
 
+        // Loop to simulate the trajectory for 50 steps
         for (int i = 0; i < 50; i++) {
+            // Update position based on velocity and gravity
             simX += simVx * simDeltaTime;
             simY += simVy * simDeltaTime + 0.5 * gravity * Math.pow(simDeltaTime, 2);
+
+            // Update vertical velocity due to gravity
             simVy += gravity * simDeltaTime;
 
+            // Add the new position to the trajectory list
             trajectory.add(new Point((int) simX, (int) simY));
         }
         return trajectory;
@@ -76,24 +81,32 @@ public class Arrow {
 
     public void updatePosition(double deltaTime) {
         if (isFlying) {
+            // Update the x and y coordinates based on velocity and gravity
             x += vx * deltaTime;
             y += vy * deltaTime + 0.5 * gravity * Math.pow(deltaTime, 2);
+
+            // Update the vertical velocity with gravity's effect
             vy += gravity * deltaTime;
 
+            // Calculate the new angle of the object based on its velocity
             angle = Math.toDegrees(Math.atan2(-vy, vx));
 
         }
     }
 
     public void draw(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g.create();
-        AffineTransform arrow = new AffineTransform();
+        Graphics2D g2d = (Graphics2D) g.create();  // Create a copy of the graphics context for safe modifications
+        AffineTransform arrow = new AffineTransform();  // Create a transformation for the arrow image
 
+        // Translate the image to the specified position, adjusting so the center of the image is at (x, y)
         arrow.translate(x - image.getWidth() / 2.0, y - image.getHeight() / 2.0);
 
+        // Rotate the image around its center based on the given angle
         arrow.rotate(Math.toRadians(-angle), image.getWidth() / 2.0, image.getHeight() / 2.0);
 
+        // Draw the transformed image on the screen
         g2d.drawImage(image, arrow, null);
+
         g2d.dispose();
     }
     public Point getTipPosition() {
@@ -127,13 +140,6 @@ public class Arrow {
         return speed;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
     public void setAngle(double angle) {
         this.angle = angle;
         if (!isFlying) {
@@ -144,13 +150,6 @@ public class Arrow {
         return hasHitTarget;
     }
 
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    public void setImage(BufferedImage image) {
-        this.image = image;
-    }
 
     public void changeAngleBy(double delta) {
         setAngle(this.angle + delta);
